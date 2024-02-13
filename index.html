@@ -71,8 +71,9 @@
             document.body.appendChild(renderer.domElement);
             const scene = new THREE.Scene();
 
-            const pointsX = [];
             function setUpBasis(scene) {
+                const pointsX = [];
+                pointsX.push( new THREE.Vector3( 0, 0, 0 ) );
                 pointsX.push( new THREE.Vector3( 3, 0, 0 ) );
                 const pointsY = [];
                 pointsY.push( new THREE.Vector3( 0, 0, 0 ) );
@@ -90,8 +91,6 @@
                 const lineGeometryZ = new THREE.BufferGeometry().setFromPoints( pointsZ );
                 const lineZ = new THREE.Line( lineGeometryZ, new THREE.LineBasicMaterial( { color: 0x0000ff } ) );
                 scene.add( lineZ);
-                pointsX.push( new THREE.Vector3( 0, 0, 0 ) );
-                pointsX.push( new THREE.Vector3( 0, 0, 0 ) );
             }
             setUpBasis(scene)
             
@@ -172,7 +171,6 @@
                 Speed.geometry.attributes.position.array[3] = xSpeed;
                 Speed.geometry.attributes.position.array[4] = ySpeed;
                 Speed.geometry.attributes.position.array[5] = zSpeed;
-                
                 
                 Mag.geometry.attributes.position.array[3] = xMag;
                 Mag.geometry.attributes.position.array[4] = yMag;
