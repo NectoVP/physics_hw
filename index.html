@@ -15,23 +15,19 @@
     <div id="input-container">
         <div>
             <label for="len">Длина волны, нМ: </label>
-            <input type="number" id="len" class="len" value="100">
+            <input type="number" id="len" class="len" value="500">
         </div>
         <div>
-            <label for="prelom1">Показатель преломления, n1: </label>
-            <input type="number" id="prelom1" class="prelom1" value="1">
+            <label for="prelom">Показатель преломления, n: </label>
+            <input type="number" id="prelom" class="prelom" value="1">
         </div>
         <div>
-            <label for="prelom2">Показатель преломления, n2: </label>
-            <input type="number" id="prelom2" class="prelom2" value="1">
-        </div>
-        <div>
-            <label for="holes">Расстояние между щелями, м</label>
-            <input type="number" id="holes" class="holes" value="0.05">
+            <label for="width">Расстояние между щелями, м</label>
+            <input type="number" id="width" class="width" value="1">
         </div>
         <div>
             <label for="dist">Расстояние до экрана, м</label>
-            <input type="number" id="dist" class="dist" value="1">
+            <input type="number" id="dist" class="dist" value="100">
         </div>
         <div>
             <button>Построить графики</button>
@@ -40,6 +36,7 @@
 
     <div id="graph-container">
         <div class="graph" id="graph"></div>
+        <div class="graph" id="graph2"></div>
     </div>
 
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -48,48 +45,41 @@
 
         function updateGraph() {
         
-            let len = parseFloat(document.querySelector('.len').value) / (10**9);
-            let prelom1 = parseFloat(document.querySelector('.prelom1').value);
-            let prelom2 = parseFloat(document.querySelector('.prelom2').value);
-            let wid = parseFloat(document.querySelector('.holes').value);
+            let len = parseFloat(document.querySelector('.len').value);
+            let prelom = parseFloat(document.querySelector('.prelom').value);
+            let wid = parseFloat(document.querySelector('.width').value);
             let dist = parseFloat(document.querySelector('.dist').value);
             
-            if (isNaN(len) || len <= 0 || isNaN(prelom1) || prelom1 <= 0 || isNaN(prelom2) || prelom2 < 0 || isNaN(wid) || wid < 0 || isNaN(dist) || dist < 0) {
+            if (isNaN(len) || len <= 0 || isNaN(prelom) || prelom <= 0 || isNaN(wid) || wid < 0 || isNaN(dist) || dist < 0) {
                 alert("введены некорректные значения");
                 return;
             }
             
             shapes = [];
-            let width = len * dist / wid;
-            console.log(width);
-            width = 10; 
-            let range = 1000;
-            let flag = 1;
+            let range = 10;
             let intensity_0 = 1;
-            let intensity = 4 * intensity_0 * Math.cos(Math.PI / len * dist * prelom1 / wid) ** 2;
-            for(let i = 0; i < range; flag++, i+=width) {
-                if(i + width > range)
-                    break;
-                let intensity = 4 * intensity_0 * Math.cos(Math.PI / len * dist * prelom1 / wid) ** 2;
-                let color='rgba(225, 232, 107, 0.5)'
-                if(flag % 2 != 0)
-                    color='rgba(225, 232, 107, 0.8)'
-                shapes.push(
-                    {
+
+            const xValues = [];
+            const yValues = [];
+
+            let j = 0;
+            for(let i = -range; i < range; i+=0.1, j++) {
+                let intensity = 4 * intensity_0 * Math.cos(Math.PI / (len * 10 ** -4 * dist) * i * prelom * wid) ** 2;
+                let color = (j % 2 === 0) ? 'rgba(0, 0, 0, 1)' : 'rgba(255, 255, 255, 1)';
+                color = `rgba(${Math.floor(intensity * 255)}, ${Math.floor(intensity * 255)}, ${Math.floor(intensity * 255)}, 1)`;
+                xValues.push(i);
+                yValues.push(intensity);
+                console.log(intensity);
+                shapes.push({
                     type: 'rect',
                     xref: 'x',
                     yref: 'y',
-                    x0: i,
+                    x0: i * 10,
                     y0: 0,
-                    x1: i + width,
-                    y1: 2,
-                    line: {
-                        color: 'rgb(225, 232, 107)',
-                        width: 3
-                    },
+                    x1: (i + 1) * 10,
+                    y1: 10,
                     fillcolor: color
-                    }
-                )
+                });
             }
 
             var layout = {
@@ -97,16 +87,29 @@
                 xaxis: {
                     visible: false,
                     showgrid: true,
-                    range: [-range, range]
+                    range: [-range*10, range*10]
                 },
                 yaxis: {
-                    range: [0, 2],
+                    range: [0, 10],
                     visible: false,
                     showgrid: true
                 },
+                width: 1500,
                 height: 600,
                 shapes: shapes
             };
+
+            Plotly.newPlot('graph2', [{
+                x: xValues,
+                y: yValues,
+                type: 'scatter',
+                mode: 'lines',
+                line: { shape: 'spline' }
+            }], {
+                title: 'Интенсивность',
+                xaxis: { title: { text: 'Время (сек)' } },
+                yaxis: { title: { text: 'Интенсивность, (Вт/м^2)'} }
+            });
 
             var data = [];
 
